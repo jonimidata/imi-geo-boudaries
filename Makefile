@@ -10,7 +10,7 @@ clean:
 
 topojson/boundaries.json: geojson/states.json geojson/countries.json
 	mkdir -p $(dir $@)
-	topojson -q 1e10 -o $@ $<
+	topojson -s 7e-7 -q 1e5 -o $@ $<
 
 # convert to geojson and filter for just US, CA, and MX
 geojson/states.json: shp/ne_10m_admin_1_states_provinces_lakes_shp.shp
