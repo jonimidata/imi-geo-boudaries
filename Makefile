@@ -1,5 +1,5 @@
 
-all: geojson/ne_10m_admin_1_states_provinces_lakes_shp.json geojson/ne_10m_admin_0_countries_lakes.json
+all: geojson/states.json geojson/countries.json
 
 clean:
 	rm -rf zip
@@ -8,11 +8,11 @@ clean:
 	rm -rf topojson
 
 # convert to geojson and filter for just US, CA, and MX
-geojson/ne_10m_admin_1_states_provinces_lakes_shp.json: shp/ne_10m_admin_1_states_provinces_lakes_shp.shp
+geojson/states.json: shp/ne_10m_admin_1_states_provinces_lakes_shp.shp
 	mkdir -p $(dir $@)
 	ogr2ogr -f GeoJSON -lco COORDINATE_PRECISION=2 -simplify 0.02 -select "sr_sov_a3,iso_a2,name,code_hasc,region,region_big,postal" -where "sr_adm0_a3 IN ('USA', 'CAN', 'MEX')" $@ $<
 	touch $@
-geojson/ne_10m_admin_0_countries_lakes.json: shp/ne_10m_admin_0_countries_lakes.shp
+geojson/countries.json: shp/ne_10m_admin_0_countries_lakes.shp
 	mkdir -p $(dir $@)
 	ogr2ogr -f GeoJSON -lco COORDINATE_PRECISION=2 -simplify 0.02 -select "sov_a3,name,iso_a2" -where "adm0_a3 IN ('USA', 'CAN', 'MEX')" $@ $<
 	touch $@
