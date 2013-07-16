@@ -11,17 +11,13 @@ clobber: clean
 	rm -rf zip
 
 
-topojson/boundaries.topojson: topojson/states.topojson geojson/countries.json
+topojson/boundaries.topojson: geojson/states.json geojson/countries.json
 	mkdir -p $(dir $@)
-	topojson -o $@ -- states=topojson/states.topojson countries=geojson/countries.json 
+	topojson -o $@ -- states=geojson/states.json countries=geojson/countries.json 
 	cp topojson/boundaries.topojson boundaries.topojson
 
-topojson/states.topojson: geojson/mex.json geojson/usa-can.json 
-	mkdir -p $(dir $@)
-	topojson -o $@ -- geojson/mex.json geojson/usa-can.json
-
 # convert to geojson and filter for just US, CA, and MX
-geojson/usa-can.json: shp/ne_50m_admin_1_states_provinces_lakes_shp.shp
+geojson/states.json: shp/ne_50m_admin_1_states_provinces_lakes_shp.shp
 	mkdir -p $(dir $@)
 	#ogr2ogr -f GeoJSON -lco COORDINATE_PRECISION=2 -simplify 0.02 -select "sr_sov_a3,iso_a2,name,code_hasc,region,region_big,postal" -where "sr_adm0_a3 IN ('USA', 'CAN', 'MEX')" $@ $<
 	ogr2ogr -f GeoJSON -select "sr_sov_a3,iso_a2,name,code_hasc,region,region_big,postal" -where "sr_adm0_a3 IN ('USA', 'CAN')" $@ $<
