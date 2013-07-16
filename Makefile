@@ -13,12 +13,12 @@ clobber: clean
 
 topojson/boundaries.topojson: topojson/states.topojson geojson/countries.json
 	mkdir -p $(dir $@)
-	topojson -s 7e-7 -q 1e5 -o $@ -- states=topojson/states.topojson countries=geojson/countries.json 
+	topojson -o $@ -- states=topojson/states.topojson countries=geojson/countries.json 
 	cp topojson/boundaries.topojson boundaries.topojson
 
 topojson/states.topojson: geojson/mex.json geojson/usa-can.json 
 	mkdir -p $(dir $@)
-	topojson -o $@ -- geojson/mex.json geojson/usa-can.json
+	topojson -s 7e-7 -q 1e5 -o $@ -- geojson/mex.json geojson/usa-can.json
 
 # convert to geojson and filter for just US, CA, and MX
 geojson/usa-can.json: shp/ne_50m_admin_1_states_provinces_lakes_shp.shp
