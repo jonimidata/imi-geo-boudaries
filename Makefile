@@ -11,13 +11,13 @@ clobber: clean
 	rm -rf zip
 
 
-topojson/boundaries.topojson: geojson/states.json geojson/countries.json
+topojson/boundaries.topojson: geojson/mex.json geojson/usa-can.json geojson/countries.json
 	mkdir -p $(dir $@)
-	topojson -o $@ -- states=geojson/states.json countries=geojson/countries.json 
+	topojson -o $@ -- states=geojson/mex.json geojson/usa-can.json countries=geojson/countries.json 
 	cp topojson/boundaries.topojson boundaries.topojson
 
 # convert to geojson and filter for just US, CA, and MX
-geojson/states.json: shp/ne_50m_admin_1_states_provinces_lakes_shp.shp
+geojson/usa-can.json: shp/ne_50m_admin_1_states_provinces_lakes_shp.shp
 	mkdir -p $(dir $@)
 	#ogr2ogr -f GeoJSON -lco COORDINATE_PRECISION=2 -simplify 0.02 -select "sr_sov_a3,iso_a2,name,code_hasc,region,region_big,postal" -where "sr_adm0_a3 IN ('USA', 'CAN', 'MEX')" $@ $<
 	ogr2ogr -f GeoJSON -select "sr_sov_a3,iso_a2,name,code_hasc,region,region_big,postal" -where "sr_adm0_a3 IN ('USA', 'CAN')" $@ $<
@@ -25,7 +25,7 @@ geojson/states.json: shp/ne_50m_admin_1_states_provinces_lakes_shp.shp
 geojson/mex.json: shp/ne_10m_admin_1_states_provinces_lakes_shp.shp
 	mkdir -p $(dir $@)
 	#ogr2ogr -f GeoJSON -lco COORDINATE_PRECISION=2 -simplify 0.02 -select "sr_sov_a3,iso_a2,name,code_hasc,region,region_big,postal" -where "sr_adm0_a3 IN ('USA', 'CAN', 'MEX')" $@ $<
-	ogr2ogr -f GeoJSON -select "sr_sov_a3,iso_a2,name,code_hasc,region,region_big,postal" -where "sr_adm0_a3 IN ('MEX')" $@ $<
+	ogr2ogr -f GeoJSON -simplify 0.01 -lco COORDINATE_PRECISION=2 -select "sr_sov_a3,iso_a2,name,code_hasc,region,region_big,postal" -where "sr_adm0_a3 IN ('MEX')" $@ $<
 	touch $@
 geojson/countries.json: shp/ne_50m_admin_0_countries_lakes.shp
 	mkdir -p $(dir $@)
