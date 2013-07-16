@@ -13,7 +13,7 @@ clobber: clean
 
 topojson/boundaries.topojson: topojson/states.topojson geojson/countries.json
 	mkdir -p $(dir $@)
-	topojson -s 7e-7 -q 1e5 -o $@ -- states=topojson/states.topojson countries=geojson/countries.json 
+	topojson -o $@ -- states=topojson/states.topojson countries=geojson/countries.json 
 	cp topojson/boundaries.topojson boundaries.topojson
 
 topojson/states.topojson: geojson/mex.json geojson/usa-can.json 
