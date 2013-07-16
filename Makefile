@@ -18,7 +18,7 @@ topojson/boundaries.topojson: topojson/states.topojson geojson/countries.json
 
 topojson/states.topojson: geojson/mex.json geojson/usa-can.json 
 	mkdir -p $(dir $@)
-	topojson -s 7e-7 -q 1e5 -o $@ -- geojson/mex.json geojson/usa-can.json
+	topojson -o $@ -- geojson/mex.json geojson/usa-can.json
 
 # convert to geojson and filter for just US, CA, and MX
 geojson/usa-can.json: shp/ne_50m_admin_1_states_provinces_lakes_shp.shp
