@@ -1,6 +1,6 @@
 TOPOJSON = node_modules/.bin/topojson
 
-all: topojson/boundaries.topojson
+all: boundaries.topojson
 
 clean:
 	rm -rf shp
@@ -10,11 +10,12 @@ clean:
 clobber: clean
 	rm -rf zip
 
+boundaries.topojson: topojson/boundaries.topojson 
+	cp topojson/boundaries.topojson boundaries.topojson
 
 topojson/boundaries.topojson: geojson/mex.json geojson/usa-can.json geojson/countries.json
 	mkdir -p $(dir $@)
 	topojson -o $@ -- states=geojson/mex.json geojson/usa-can.json countries=geojson/countries.json 
-	cp topojson/boundaries.topojson boundaries.topojson
 
 # convert to geojson and filter for just US, CA, and MX
 geojson/usa-can.json: shp/ne_50m_admin_1_states_provinces_lakes_shp.shp
