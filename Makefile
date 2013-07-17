@@ -1,6 +1,7 @@
 TOPOJSON = node_modules/.bin/topojson
-
-all: topojson/boundaries.topojson
+TOPOJSON = /usr/local/bin/topojson
+ 
+all: topojson/boundaries.topojson topojson/us-counties-10m.topojson
 
 clean:
 	rm -rf shp
@@ -9,6 +10,7 @@ clean:
 
 clobber: clean
 	rm -rf zip
+	rm -rf gz
 
 topojson/boundaries.topojson: geojson/mex.json geojson/usa-can.json geojson/countries.json
 	mkdir -p $(dir $@)
@@ -72,3 +74,38 @@ zip/ne_50m_admin_1_states_provinces_lakes_shp.zip:
 	wget "http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/cultural/ne_50m_admin_1_states_provinces_lakes_shp.zip" -O $@.download
 	mv $@.download $@
 
+
+
+
+
+# For the full United States:
+# - remove duplicate state geometries (e.g., Great Lakes)
+# - merge the nation object into a single MultiPolygon
+topojson/us-counties.topojson: shp/us/counties.shp shp/us/states.shp shp/us/nation.shp
+	mkdir -p $(dir $@)
+	$(TOPOJSON) -q 1e5 --id-property=FIPS,STATE_FIPS -p name=COUNTY,name=STATE -- $(filter %.shp,$^) | bin/topouniq states | bin/topomerge nation 1 > $@
+
+# A simplified version of us-counties.json.
+topojson/us-counties-10m.topojson: shp/us/counties.shp shp/us/states.shp shp/us/nation.shp
+	mkdir -p $(dir $@)
+	$(TOPOJSON) -q 1e5 -s 7e-7 --id-property=+FIPS,+STATE_FIPS -- shp/us/counties.shp shp/us/states.shp land=shp/us/nation.shp | bin/topouniq states | bin/topomerge land 1 > $@
+
+shp/us/counties.shp: shp/us/counties-unfiltered.shp
+	rm -f $@
+	ogr2ogr -f 'ESRI Shapefile' -where "FIPS NOT LIKE '%000'" $@ $<
+
+shp/us/counties-unfiltered.shp: gz/countyp010_nt00795.tar.gz
+shp/us/states.shp: gz/statep010_nt00798.tar.gz
+shp/us/nation.shp: gz/nationalp010g_nt00797.tar.gz
+
+shp/us/%.shp:
+	rm -rf $(basename $@)
+	mkdir -p $(basename $@)
+	tar -xzm -C $(basename $@) -f $<
+	for file in $(basename $@)/*; do chmod 644 $$file; mv $$file $(basename $@).$${file##*.}; done
+	rmdir $(basename $@)
+
+gz/%.tar.gz:
+	mkdir -p $(dir $@)
+	curl 'http://dds.cr.usgs.gov/pub/data/nationalatlas/$(notdir $@)' -o $@.download
+	mv $@.download $@
