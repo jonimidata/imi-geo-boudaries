@@ -1,6 +1,6 @@
 TOPOJSON = node_modules/.bin/topojson
 
-all: boundaries.topojson
+all: topojson/boundaries.topojson
 
 clean:
 	rm -rf shp
@@ -9,9 +9,6 @@ clean:
 
 clobber: clean
 	rm -rf zip
-
-boundaries.topojson: topojson/boundaries.topojson 
-	cp topojson/boundaries.topojson boundaries.topojson
 
 topojson/boundaries.topojson: geojson/mex.json geojson/usa-can.json geojson/countries.json
 	mkdir -p $(dir $@)
