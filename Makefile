@@ -24,7 +24,8 @@ topojson/provinces.topojson: geojson/provinces.json
 
 topojson/us-counties-10m.topojson: shp/us/counties.shp shp/us/states.shp shp/us/nation.shp
 	mkdir -p $(dir $@)
-	$(TOPOJSON) -q 1e5 -s 7e-7 --id-property=+FIPS,+STATE_FIPS -- shp/us/counties.shp shp/us/states.shp land=shp/us/nation.shp | bin/topouniq states | bin/topomerge land 1 > $@
+	#$(TOPOJSON) -q 1e5 -s 7e-7 --id-property=+STATE,+FIPScode_hasc -- shp/us/counties.shp shp/us/states.shp land=shp/us/nation.shp | bin/topouniq states | bin/topomerge land 1 > $@
+	$(TOPOJSON) -q 1e5 -s 7e-7 --id-property=code_hasc -- shp/us/counties.shp > $@
 	touch $@
 
 geojson/provinces.json: shp/provinces.shp
@@ -100,11 +101,9 @@ topojson/us-counties.topojson: shp/us/counties.shp shp/us/states.shp shp/us/nati
 	mkdir -p $(dir $@)
 	$(TOPOJSON) -p -q 1e5 --id-property=FIPS,STATE_FIPS -p name=COUNTY,name=STATE -- $(filter %.shp,$^) | bin/topouniq states | bin/topomerge nation 1 > $@
 
-# A simplified version of us-counties.json.
-
 shp/us/counties.shp: shp/us/counties-unfiltered.shp
 	rm -f $@
-	ogr2ogr -f 'ESRI Shapefile' -where "FIPS NOT LIKE '%000'" $@ $<
+	ogr2ogr -f 'ESRI Shapefile' -sql "SELECT COUNTY, FIPS, SUBSTR(FIPS,3,3) as COUNTY_FIPS,STATE,STATE_FIPS, CONCAT('US.',STATE,'.',SUBSTR(FIPS,3,3)) as code_hasc FROM 'counties-unfiltered' WHERE FIPS NOT LIKE '%000'" $@ $<
 
 shp/us/counties-unfiltered.shp: gz/countyp010_nt00795.tar.gz
 shp/us/states.shp: gz/statep010_nt00798.tar.gz
