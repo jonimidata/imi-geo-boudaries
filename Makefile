@@ -22,6 +22,11 @@ topojson/provinces.topojson: geojson/provinces.json
 	topojson -p --id-property=code_hasc -o $@ -- provinces=geojson/provinces.json
 	touch $@
 
+topojson/regions.topojson: geojson/regions.json
+	mkdir -p $(dir $@)
+	topojson -p --id-property=region_big -o $@ -- provinces=geojson/regions.json
+	touch $@
+
 topojson/us-counties-10m.topojson: shp/us/counties.shp shp/us/states.shp shp/us/nation.shp
 	mkdir -p $(dir $@)
 	#$(TOPOJSON) -q 1e5 -s 7e-7 --id-property=+STATE,+FIPScode_hasc -- shp/us/counties.shp shp/us/states.shp land=shp/us/nation.shp | bin/topouniq states | bin/topomerge land 1 > $@
@@ -32,6 +37,12 @@ geojson/provinces.json: shp/provinces.shp
 	mkdir -p $(dir $@)
 	ogr2ogr -f GeoJSON $@ $<
 	touch $@
+geojson/regions.json: shp/regions.shp
+	mkdir -p $(dir $@)
+	ogr2ogr -f GeoJSON $@ $<
+	touch $@
+
+
 
 shp/provinces.shp: shp/mexico.shp shp/ne_50m_admin_1_states_provinces_lakes_shp.shp
 	ogr2ogr -select "sr_sov_a3,iso_a2,name,code_hasc,region,region_big,postal" -where "sr_adm0_a3 IN ('USA', 'CAN')" $@ shp/ne_50m_admin_1_states_provinces_lakes_shp.shp
@@ -63,6 +74,11 @@ shp/ne_50m_admin_0_countries_lakes.shp: zip/ne_50m_admin_0_countries_lakes.zip
 	unzip -d shp $<
 	touch $@
 
+shp/region-shp.zip: zip/region-shp.zip
+	mkdir -p $(dir $@)
+	unzip -d shp $<
+	touch $@
+
 
 # Download Original Data
 zip/ne_10m_admin_1_states_provinces_lakes_shp.zip:
@@ -89,7 +105,10 @@ zip/ne_50m_admin_1_states_provinces_lakes_shp.zip:
 	mkdir -p $(dir $@)
 	wget "http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/cultural/ne_50m_admin_1_states_provinces_lakes_shp.zip" -O $@.download
 	mv $@.download $@
-
+zip/region-shp.zip:
+	mkdir -p $(dir $@)
+	wget "https://s3.amazonaws.com/imi-model-input-XqXP6Ln7xIg8I2Of/shp/region-shp.zip?AWSAccessKeyId=ASIAI6UW7DB52LVWBEXA&Expires=1379000981&Signature=zXkaLfh/s4KONwitDxLwBTYJShw%3D&x-amz-security-token=AQoDYXdzENn//////////wEawAK%2BrHbW7hSmqdyA6eYlHVWFUZcBkhkGychmHODaR1SjU0nQSB1ahGTKeBzbyMYgiL53bpLeUcXTtCGXHWzV1UxJAamyLN%2BV40WForidvQfcYucQVKxC4oKVPKjph73ur5R0RQrD8IF5OsvvDpLQSJmFNuS1C8WrNa2kpGYcUnqdAKwclLKqT2oWHJGbEKeULU/2g6svXE/FW48oj%2BEk4TtLFRvBY8mZ09xWAObMHzGGRal8ZxeSocqiS2IlLzAovpsevI6tkl0yNg1yfjI812p0vvXcvxuOUOLa4AdQNZhD4Xn1laCLHwaIGgpR7/WwX%2BvqSTKZASWD4Wu5GkOdJ2pxkaPODKTv4OzNmbOKLaRXwXKVYBqKJDhbOppTbwFh9xRkplpb/36CzVn3u1MYeY%2BVRL1DdLD1vnzKRmK2s9DoXiCuwseRBQ%3D%3D" -O $@.download
+	mv $@.download $@
 
 
 
